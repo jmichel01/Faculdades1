@@ -1,0 +1,13 @@
+[2026-05-22 18:31:25,988] [INFO] [optilogix.main] [logger.py:44]: OptiLogix Logging Subsystem initialized successfully.
+[2026-05-22 18:31:25,991] [INFO] [optilogix.main] [main.py:103]: Initializing and seeding database...
+[2026-05-22 18:31:35,601] [INFO] [optilogix.main] [main.py:106]: Database seeding completed successfully.
+[2026-05-22 18:47:17,174] [INFO] [optilogix.main] [logger.py:44]: OptiLogix Logging Subsystem initialized successfully.
+[2026-05-22 18:47:21,112] [INFO] [optilogix.app] [logger.py:44]: OptiLogix Logging Subsystem initialized successfully.
+[2026-05-22 18:47:44,793] [INFO] [optilogix.main] [logger.py:44]: OptiLogix Logging Subsystem initialized successfully.
+[2026-05-22 19:02:48,266] [INFO] [optilogix.main] [logger.py:44]: OptiLogix Logging Subsystem initialized successfully.
+[2026-05-22 19:02:53,634] [INFO] [optilogix.app] [logger.py:44]: OptiLogix Logging Subsystem initialized successfully.
+[2026-05-24 01:00:13,971] [INFO] [optilogix.main] [logger.py:44]: OptiLogix Logging Subsystem initialized successfully.
+[2026-05-24 01:00:13,972] [WARNING] [optilogix.main] [main.py:109]: Resetting database...
+[2026-05-24 01:00:14,383] [INFO] [optilogix.main] [main.py:112]: Database reset completed successfully.
+[2026-05-24 01:00:17,332] [INFO] [optilogix.main] [logger.py:44]: OptiLogix Logging Subsystem initialized successfully.
+[2026-05-24 01:02:51,683] [INFO] [optilogix.app] [logger.py:44]: OptiLogix Logging Subsystem initialized successfully.
