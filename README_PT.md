@@ -76,7 +76,19 @@ O projeto segue os princípios da **Arquitetura Limpa** (*Clean Architecture*), 
 ```
 
 ---
+## 🧠 Como o Código Funciona
 
+O projeto é composto por um front-end Streamlit, uma camada de serviços de otimização e uma camada de dados SQLite.
+
+- `app.py`: ponto de entrada principal do dashboard Streamlit. Configura a página, carrega o CSS e monta a interface do usuário. Recebe entradas de rota, faz geocodificação e chama `OptimizerService` para gerar rotas e comparações de custo/tempo/emissões.
+- `main.py`: gerenciador CLI do sistema. Permite inicializar, resetar e semear o banco de dados e exibir explicações matemáticas do modelo.
+- `services/optimizer_service.py`: orquestrador de roteamento e TSP. Combina trânsito, clima, preço de combustível e características dos veículos para escolher o melhor caminho.
+- `database/manager.py` e `database/schema.py`: inicializam e conectam o banco SQLite em modo WAL. Criam tabelas, gerenciam conexões e permitem persistir histórico de otimizações.
+- `maps/visualizer.py` e `visualization/charts.py`: geram mapas Folium e gráficos Plotly para apresentação de resultados em tempo real.
+- `routing/`, `optimization/` e `vehicles/`: implementam o motor de Dijkstra, o solver de TSP exato e as definições dos veículos (bicicleta, moto, carro).
+- `tests/`: suíte que valida a geração de rotas e os serviços com `pytest`.
+
+---
 ## 🧮 Modelagem Matemática e Algoritmos
 
 A inteligência da plataforma está baseada em quatro pilares matemáticos:
@@ -103,7 +115,7 @@ Resolve o ordenamento de entregas de forma ótima computando a matriz de adjacê
 ## 📦 Requisitos e Dependências
 
 ### Pré-requisitos
-* **Python 3.8+** (Totalmente testado em versões até o Python 3.12 e 3.13)
+* **Python 3.14** (recomendado, compatível com as dependências usadas no projeto)
 * Conectividade com a internet na primeira execução para baixar os mapas reais (OpenStreetMap) e caches das cidades.
 
 ### Principais Dependências (instaladas via `requirements.txt`):
@@ -142,17 +154,22 @@ Para isolar as dependências e evitar conflitos com outros projetos:
 python -m venv venv
 .\venv\Scripts\Activate
 
+# Caso o Python padrão não seja 3.14, use:
+py -3.14 -m venv venv
+.\venv\Scripts\Activate
+
 # No macOS / Linux:
 python3 -m venv venv
 source venv/bin/activate
 ```
 
-### Passo 3: Instalar as Dependências
-Instale todas as bibliotecas requeridas listadas no arquivo `requirements.txt`:
+### Passo 3: Atualizar ferramentas e instalar as dependências
+Atualize o instalador e instale as bibliotecas listadas em `requirements.txt`:
 ```bash
-pip install -r requirements.txt
+python -m pip install --upgrade pip setuptools wheel
+python -m pip install -r requirements.txt
 ```
-*(Nota para Windows: A instalação de pacotes GIS como o `osmnx` no Python moderno é totalmente automatizada por meio do pip. Caso ocorra qualquer erro de compilação C++, verifique se possui os pacotes corretos ou utilize gerenciadores como o `conda`/`uv`).*
+*(Nota para Windows: a instalação de pacotes GIS como o `osmnx` pode exigir uma versão estável do Python. Se ocorrer erro de compilação C++, utilize `py -3.14` ou um ambiente Conda com Python 3.14).*
 
 ### Passo 4: Configurar as Variáveis de Ambiente
 Verifique ou crie o arquivo `.env` na raiz do projeto contendo as variáveis básicas de diretório:
