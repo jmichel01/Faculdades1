@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # OptiLogix Enterprise: Supply Chain Optimization & Analytical Platform
 ### ⚡ ExpoTech 2026 Academic & Corporate Operations Manifesto
 
@@ -205,3 +206,7 @@ streamlit run app.py
 ## 9. Future Enhancements
 *   **Genetic Algorithms (GA)**: Integrate heuristic GA solvers for routing scales exceeding 20 destinations where exact TSP permutations are computationally prohibitive.
 *   **Dynamic API Feeds**: Replace historical mock weather files with real-time OpenWeatherMap API integrations to automate route calculations on live rain/snow multipliers.
+=======
+# Faculdades1
+Arquivo do projeto da faculdade 
+>>>>>>> f39576dfa9134749dcaf4bfad41401387d2fbb81
