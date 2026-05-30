@@ -1,0 +1,15 @@
+# Environments
+.env
+venv/
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Local Database and Logs
+data/
+logs/
+*.db
+*.log

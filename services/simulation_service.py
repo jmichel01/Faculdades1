@@ -1,6 +1,5 @@
 import logging
 import numpy as np
-from datetime import date
 from typing import Dict, Any, List
 from models.domain import SimulationRun
 from repositories.inventory_repo import InventoryRepository
@@ -12,10 +11,6 @@ from simulation.monte_carlo import MonteCarloSimulator
 logger = logging.getLogger("optilogix.service.simulation")
 
 class SimulationService:
-    """
-    Stochastic simulation engine modeling operational supply chain resilience.
-    Uses Monte Carlo methods to evaluate system performance under demand shocks and route failures.
-    """
     def __init__(self) -> None:
         self.inventory_repo = InventoryRepository()
         self.route_repo = RouteRepository()
@@ -23,14 +18,8 @@ class SimulationService:
         self.forecasting_service = ForecastingService()
 
     def run_monte_carlo_simulation(self, scenario_type: str, trials: int = 50) -> Dict[str, Any]:
-        """
-        Orchestrates Monte Carlo simulations for a selected risk profile.
-        Returns aggregated KPIs: Service Level, Stockout Rate, Total Cost, and DC Utilization,
-        along with stochastic vehicle, traffic, and weather metrics.
-        """
         logger.info(f"Running Monte Carlo Simulation under scenario: {scenario_type} ({trials} trials)...")
         
-        # 1. Fetch system baselines
         hubs = self.inventory_repo.list_hubs()
         retailers = self.inventory_repo.list_retailers()
         routes = self.route_repo.list_routes()
@@ -39,13 +28,11 @@ class SimulationService:
         if not hubs or not retailers:
             raise ValueError("Incomplete database. Ensure hubs and retailers are seeded.")
 
-        # Establish base cost and capacity vectors
         base_capacities = np.array([h.capacity for h in hubs])
         base_holding_costs = np.array([h.holding_cost for h in hubs])
         base_route_costs = np.array([r.base_cost * r.congestion_factor for r in routes])
         hubs_fixed_costs = [h.fixed_cost for h in hubs]
 
-        # Generate expected baseline demand once
         base_demands_list = []
         for r in retailers:
             for p in products:
@@ -54,7 +41,6 @@ class SimulationService:
                 
         base_demands = np.array(base_demands_list)
 
-        # Delegate execution to simulation package
         res = MonteCarloSimulator.run_simulation(
             scenario_type=scenario_type,
             trials=trials,
@@ -65,7 +51,6 @@ class SimulationService:
             hubs_fixed_costs=hubs_fixed_costs
         )
 
-        # Save primary run in SQLite database
         db_run = SimulationRun(
             id=None,
             timestamp=None,
@@ -101,3 +86,4 @@ class SimulationService:
             "sim_vehicle_costs": res["sim_vehicle_costs"],
             "sim_vehicle_co2": res["sim_vehicle_co2"]
         }
+#A

@@ -5,17 +5,12 @@ from contextlib import contextmanager
 from typing import Generator
 from config.settings import Settings
 
-# Register custom converters for date and timestamp to prevent Python 3.12+ deprecation warnings
 sqlite3.register_converter("date", lambda b: datetime.date.fromisoformat(b.decode()))
 sqlite3.register_converter("timestamp", lambda b: datetime.datetime.fromisoformat(b.decode()))
 
 logger = logging.getLogger("optilogix.database")
 
 class DatabaseConnectionManager:
-    """
-    Context manager for handling SQLite connection cycles safely.
-    Enforces ACID transactions and SQLite-specific optimization settings.
-    """
     
     @classmethod
     @contextmanager
@@ -26,11 +21,8 @@ class DatabaseConnectionManager:
                 str(Settings.DB_PATH),
                 detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES
             )
-            # Enforce foreign key constraints
             conn.execute("PRAGMA foreign_keys = ON;")
-            # Enable WAL mode for high concurrency
             conn.execute("PRAGMA journal_mode = WAL;")
-            # Performance optimization
             conn.row_factory = sqlite3.Row
             
             yield conn
@@ -43,3 +35,4 @@ class DatabaseConnectionManager:
         finally:
             if conn:
                 conn.close()
+#A

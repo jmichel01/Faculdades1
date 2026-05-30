@@ -2,10 +2,7 @@ import os
 import streamlit as st
 import pandas as pd
 import json
-import folium
 import random
-import plotly.graph_objects as go
-import plotly.express as px
 from datetime import datetime
 from config.settings import Settings
 from services.optimizer_service import OptimizerService
@@ -17,7 +14,6 @@ from analytics.processor import AnalyticsProcessor
 from utils.helpers import GeoHelpers
 from streamlit_folium import st_folium
 
-# 1. Page Configuration & Theme
 st.set_page_config(
     page_title="OptiLogix Enterprise & Smart Routing SaaS",
     page_icon="🗺️",
@@ -25,7 +21,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Load custom styling from assets/style.css
 def load_css():
     css_path = "assets/style.css"
     if os.path.exists(css_path):
@@ -36,7 +31,6 @@ def load_css():
 
 load_css()
 
-# 2. Services Initialization
 @st.cache_resource
 def get_optimizer_service():
     return OptimizerService()
@@ -44,16 +38,10 @@ def get_optimizer_service():
 optimizer_service = get_optimizer_service()
 
 def generate_random_route_points() -> None:
-    """
-    Generates random coordinates (origin + 3 delivery destinations)
-    around the default Lat/Lng location for routing simulations.
-    """
     st.session_state.locations = []
-    # Origin
     start_lat = Settings.DEFAULT_LAT + random.uniform(-0.005, 0.005)
     start_lng = Settings.DEFAULT_LNG + random.uniform(-0.005, 0.005)
     st.session_state.locations.append({"lat": start_lat, "lng": start_lng})
-    # 3 destinations
     for _ in range(3):
         st.session_state.locations.append({
             "lat": Settings.DEFAULT_LAT + random.uniform(-0.012, 0.012),
@@ -61,7 +49,6 @@ def generate_random_route_points() -> None:
         })
     st.session_state.optimization_results = None
 
-# 3. Session State Initialization
 if "locations" not in st.session_state:
     st.session_state.locations = []
 if "last_click" not in st.session_state:
@@ -69,7 +56,6 @@ if "last_click" not in st.session_state:
 if "optimization_results" not in st.session_state:
     st.session_state.optimization_results = None
 
-# --- SIDEBAR CONTROL PANEL ---
 st.sidebar.markdown(
     "<h2 style='text-align: center; color: #ffffff; font-weight: 700;'>🗺️ MOBILIDADE</h2>"
     "<p style='text-align: center; font-size: 13px; color: #a3a3a3; margin-top: -10px;'>OTIMIZAÇÃO DE ROTAS INTELIGENTE</p>",
@@ -86,7 +72,6 @@ menu = st.sidebar.radio(
     ]
 )
 
-# Sidebar Configs (Fallback defaults)
 traffic_intensity = "Medium"
 weather = "Sunny"
 fuel_price = 5.50
@@ -135,7 +120,6 @@ if menu == "💡 Roteador Interativo":
     
     st.sidebar.markdown("---")
     
-    # Columns for sidebar buttons
     col_side1, col_side2 = st.sidebar.columns(2)
     with col_side1:
         if st.button("🎲 Rotas Aleatórias", use_container_width=True):
@@ -149,9 +133,6 @@ if menu == "💡 Roteador Interativo":
             st.session_state.optimization_results = None
             st.rerun()
 
-
-
-# --- LIVE ROUTING ENGINE ---
 if menu == "💡 Roteador Interativo":
     st.markdown("<h1 class='grad-header'>💡 Roteador Interativo de Entregas</h1>", unsafe_allow_html=True)
     st.markdown(
@@ -167,9 +148,7 @@ if menu == "💡 Roteador Interativo":
     
     loc_count = len(st.session_state.locations)
     
-    # 1. Input Logic Selection
     if input_method == "Clicar no Mapa":
-        # Instruction Panel for Clicks
         if loc_count == 0:
             st.info("📌 **Ação Necessária**: Clique no mapa para definir o **Ponto de Partida**.")
         elif loc_count < 4:
@@ -177,12 +156,10 @@ if menu == "💡 Roteador Interativo":
         else:
             st.success("✅ **Localizações Definidas**: Pronto para rodar a otimização. Selecione os modos de transporte ao lado!")
             
-        # Add random route generator button directly on main map view instructions for convenience
         if st.button("🎲 Gerar Rotas e Pontos Aleatórios no Mapa", type="secondary", use_container_width=True):
             generate_random_route_points()
             st.rerun()
     else:
-        # Form for Address Input
         st.info("📝 **Digitar Endereços**: Insira os endereços abaixo. Usaremos geocodificação para determinar as coordenadas.")
         with st.form("address_form"):
             addr_start = st.text_input("Endereço do Ponto de Partida", value="Avenida Paulista, 1000, São Paulo, SP")
@@ -211,16 +188,13 @@ if menu == "💡 Roteador Interativo":
                     except Exception as e:
                         st.error(f"Erro de Geocodificação: {e}")
 
-        # Refresh loc_count after geocoding
         loc_count = len(st.session_state.locations)
 
-    # Grid columns
     col_map, col_details = st.columns([2, 1])
 
     with col_details:
         st.markdown("### 📍 Registro de Localizações")
         
-        # Display registered coordinates
         if loc_count > 0:
             for idx, loc in enumerate(st.session_state.locations):
                 label = "Origem / Partida" if idx == 0 else f"Entrega {idx}"
@@ -234,7 +208,6 @@ if menu == "💡 Roteador Interativo":
         else:
             st.write("Nenhuma localização clicada ou geocodificada ainda.")
 
-        # Transport Modes Selector
         st.markdown("### 🚲 Modos de Transporte")
         selected_vehicles = st.multiselect(
             "Selecione os Veículos para Comparar",
@@ -242,7 +215,6 @@ if menu == "💡 Roteador Interativo":
             default=["Bicicleta", "Motocicleta", "Carro"]
         )
 
-        # Trigger button
         can_optimize = loc_count >= 2 and len(selected_vehicles) > 0
         if st.button("🚀 Calcular Rota Otimizada", type="primary", disabled=not can_optimize):
             with st.spinner("Processando caminhos de ruas e resolvendo TSP..."):
@@ -263,37 +235,31 @@ if menu == "💡 Roteador Interativo":
                     st.exception(e)
 
     with col_map:
-        # 1. Initialize Map Center
         map_lat = Settings.DEFAULT_LAT
         map_lng = Settings.DEFAULT_LNG
         if loc_count > 0:
             map_lat = st.session_state.locations[0]["lat"]
             map_lng = st.session_state.locations[0]["lng"]
             
-        # 2. Build map and draw markers
         fig_map = MapVisualizer.create_base_map(map_lat, map_lng)
         
-        # Draw optimal order markers if solved, else normal sequence
         opt_order = None
         if st.session_state.optimization_results:
             opt_order = st.session_state.optimization_results["optimal_order"]
             
         MapVisualizer.plot_markers(fig_map, st.session_state.locations, opt_order)
         
-        # 3. Draw routes on the map if solved
         if st.session_state.optimization_results:
             MapVisualizer.draw_vehicle_routes(
                 fig_map,
                 st.session_state.optimization_results["legs_per_vehicle"]
             )
             
-        # 4. Render map and capture clicks only if in click mode
         has_results = st.session_state.optimization_results is not None
         if input_method == "Clicar no Mapa":
             output = st_folium(fig_map, height=500, use_container_width=True, key=f"live_map_click_{loc_count}_{has_results}")
             if output and output.get("last_clicked"):
                 click = output["last_clicked"]
-                # Prevent duplicate inserts on reruns
                 if click != st.session_state.last_click:
                     st.session_state.last_click = click
                     if len(st.session_state.locations) < 4:
@@ -302,7 +268,6 @@ if menu == "💡 Roteador Interativo":
         else:
             st_folium(fig_map, height=500, use_container_width=True, key=f"live_map_show_{loc_count}_{has_results}")
 
-    # --- RESULTS DASHBOARD ---
     if st.session_state.optimization_results:
         st.markdown("---")
         st.markdown("<h2 class='grad-header'>📊 Painel de Resultados e Otimização</h2>", unsafe_allow_html=True)
@@ -310,7 +275,6 @@ if menu == "💡 Roteador Interativo":
         res = st.session_state.optimization_results
         metrics = res["metrics"]
         
-        # AI Recommendation Box
         rec = res["recommendation"]
         st.markdown(
             f"<div class='math-block' style='background: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important;'>"
@@ -320,14 +284,12 @@ if menu == "💡 Roteador Interativo":
             unsafe_allow_html=True
         )
 
-        # KPI Metrics Cards Row
         kpi_cols = st.columns(len(metrics))
         for idx, m in enumerate(metrics):
             with kpi_cols[idx]:
                 time_str = GeoHelpers.format_time_hours(m["time_hours"])
                 v_name = m["vehicle"]
                 
-                # Customize content based on vehicle type
                 if v_name == "Bicicleta":
                     details_html = (
                         f"Distância: <b>{m['distance_km']:.2f} km</b><br/>"
@@ -342,7 +304,7 @@ if menu == "💡 Roteador Interativo":
                         f"Eficiência de Tráfego: <b>{m['traffic_efficiency']:.1f}%</b><br/>"
                         f"Velocidade Média: <b>{m['average_speed']:.1f} km/h</b><br/>"
                     )
-                else: # Carro
+                else:
                     details_html = (
                         f"Consumo: <b>{m['fuel_liters']:.2f} L</b><br/>"
                         f"Custo Combustível: <b>R$ {m['fuel_cost_usd']:.2f}</b><br/>"
@@ -363,7 +325,6 @@ if menu == "💡 Roteador Interativo":
                     unsafe_allow_html=True
                 )
 
-        # Charts Section
         st.markdown("### 📈 Gráficos Comparativos de Desempenho")
         chart_col1, chart_col2 = st.columns(2)
         
@@ -381,7 +342,6 @@ if menu == "💡 Roteador Interativo":
             fig_radar = ChartVisualizer.plot_radar_rankings(metrics)
             st.plotly_chart(fig_radar, use_container_width=True)
 
-        # Report Downloads Section
         st.markdown("### 📄 Exportar Relatórios de Operação")
         exp_col1, exp_col2, exp_col3 = st.columns(3)
         
@@ -420,7 +380,6 @@ if menu == "💡 Roteador Interativo":
             st.write("Gera uma planilha Excel multi-abas estruturada (openpyxl) com formatação financeira e de unidades.")
             
         with exp_col3:
-            # JSON Route exporter
             route_json = json.dumps({
                 "timestamp": datetime.now().isoformat(),
                 "locations": st.session_state.locations,
@@ -437,8 +396,6 @@ if menu == "💡 Roteador Interativo":
             )
             st.write("Exporta o formato JSON estruturado com coordenadas e sequência de entrega para sistemas GIS externos.")
 
-
-# --- HISTORICAL ANALYTICS ---
 elif menu == "📊 Histórico e Estatísticas":
     st.markdown("<h1 class='grad-header'>📊 Histórico e Estatísticas de Mobilidade</h1>", unsafe_allow_html=True)
     st.markdown("Acompanhe o histórico de otimizações de rotas resolvidas pelo sistema, rankings de veículos e impactos do trânsito.")
@@ -446,12 +403,10 @@ elif menu == "📊 Histórico e Estatísticas":
     runs = DatabaseManager.get_historical_runs()
     
     if runs:
-        # Process metrics using processor
         summary = AnalyticsProcessor.get_summary_stats(runs)
         inflation = AnalyticsProcessor.get_peak_hour_comparison(runs)
         rankings = AnalyticsProcessor.get_vehicle_performance_rankings(runs)
         
-        # Summary Row
         s_col1, s_col2, s_col3 = st.columns(3)
         with s_col1:
             st.metric("Total de Rotas Calculadas", summary["total_runs"])
@@ -460,7 +415,6 @@ elif menu == "📊 Histórico e Estatísticas":
         with s_col3:
             st.metric("Impacto do Trânsito em Horário de Pico", f"+{inflation['time_inflation_pct']}%", help="Percentual de aumento do tempo do Carro comparado ao trânsito baixo.")
             
-        # Comparison Table
         st.markdown("### Ranking de Desempenho Médio por Veículo")
         df_rank = pd.DataFrame(rankings)
         df_rank.rename(columns={
@@ -472,7 +426,6 @@ elif menu == "📊 Histórico e Estatísticas":
         }, inplace=True)
         st.table(df_rank)
         
-        # History table log
         st.markdown("### Log de Execuções Recentes")
         runs_display = []
         traffic_pt_map = {"Low": "Baixo", "Medium": "Médio", "High": "Alto", "Peak Hour": "Horário de Pico"}
@@ -490,8 +443,6 @@ elif menu == "📊 Histórico e Estatísticas":
     else:
         st.info("Nenhum histórico de roteamento encontrado no banco de dados. Execute uma rota primeiro!")
 
-
-# --- SYSTEM MANAGEMENT ---
 elif menu == "🗄️ Configurações do Sistema":
     st.markdown("<h1 class='grad-header'>🗄️ Configurações do Sistema</h1>", unsafe_allow_html=True)
     st.markdown("Gerenciamento de cache de mapas locais e registros de execuções salvas.")
@@ -499,7 +450,7 @@ elif menu == "🗄️ Configurações do Sistema":
     col1, col2 = st.columns(2)
     with col1:
         st.markdown("### Cache e Recursos de Memória")
-        st.write("O Streamlit e o OSMnx armazenam mapas e grafos locais de ruas para agilizar as pesquisas futuras.")
+        st.write("O Streamlit e o OSMnx armazenam mapas e grafos locais de ruas para agilizar as pesquisas futures.")
         if st.button("🧹 Limpar Caches do Sistema", type="primary"):
             st.cache_resource.clear()
             st.success("Caches e recursos de memória limpos com sucesso!")

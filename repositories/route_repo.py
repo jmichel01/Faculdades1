@@ -5,9 +5,6 @@ from models.domain import Route
 from repositories.base_repository import BaseRepository
 
 class RouteRepository(BaseRepository):
-    """
-    CRUD repository for tracking geographic route connections between Hubs and Retailers.
-    """
     def __init__(self) -> None:
         super().__init__("optilogix.repository.route")
 
@@ -69,3 +66,4 @@ class RouteRepository(BaseRepository):
         with DatabaseConnectionManager.get_connection() as conn:
             conn.execute(query)
         self.logger.info("Cleared all route instances from SQLite database.")
+#A

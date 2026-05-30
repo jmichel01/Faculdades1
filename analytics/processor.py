@@ -5,15 +5,9 @@ from typing import Dict, Any, List
 logger = logging.getLogger("smart_routing.analytics.processor")
 
 class AnalyticsProcessor:
-    """
-    Processes historical route runs logs to generate statistics, trends, and rankings.
-    """
     
     @staticmethod
     def get_summary_stats(runs: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """
-        Computes general summaries over historical sessions.
-        """
         if not runs:
             return {
                 "total_runs": 0,
@@ -24,7 +18,6 @@ class AnalyticsProcessor:
             
         df = pd.DataFrame(runs)
         
-        # Calculate average distance from metrics
         all_distances = []
         for run in runs:
             for metric in run["metrics"]:
@@ -41,9 +34,6 @@ class AnalyticsProcessor:
 
     @staticmethod
     def get_vehicle_performance_rankings(runs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """
-        Aggregates average performance values per vehicle mode.
-        """
         if not runs:
             return []
             
@@ -62,7 +52,6 @@ class AnalyticsProcessor:
         if df.empty:
             return []
             
-        # Group by vehicle type and calculate averages
         grouped = df.groupby("vehicle").mean().reset_index()
         
         rankings = []
@@ -75,14 +64,10 @@ class AnalyticsProcessor:
                 "sustainability_score": int(row["sustainability_score"])
             })
             
-        # Sort by speed/time by default
         return sorted(rankings, key=lambda x: x["avg_time_mins"])
 
     @staticmethod
     def get_peak_hour_comparison(runs: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """
-        Compares average travel times and fuel costs between peak and non-peak configurations.
-        """
         if not runs:
             return {"peak_avg_time_mins": 0.0, "offpeak_avg_time_mins": 0.0, "time_inflation_pct": 0.0}
             
@@ -92,7 +77,7 @@ class AnalyticsProcessor:
         for run in runs:
             is_peak = run["traffic_intensity"] in ["High", "Peak Hour"]
             for m in run["metrics"]:
-                if m["vehicle"] == "Carro":  # Use Carro as the benchmark
+                if m["vehicle"] == "Carro":
                     if is_peak:
                         peak_times.append(m["time_hours"] * 60.0)
                     else:
@@ -110,3 +95,4 @@ class AnalyticsProcessor:
             "offpeak_avg_time_mins": round(avg_offpeak, 1),
             "time_inflation_pct": round(inflation, 1)
         }
+#A

@@ -7,9 +7,6 @@ from models.domain import SimulationRun, OptimizationRun
 from repositories.base_repository import BaseRepository
 
 class SimulationRepository(BaseRepository):
-    """
-    CRUD repository for simulation logs and optimization history.
-    """
     def __init__(self) -> None:
         super().__init__("optilogix.repository.simulation")
 
@@ -74,7 +71,7 @@ class SimulationRepository(BaseRepository):
             ))
             row = cursor.fetchone()
             if row:
-                run.id = row["id"]
+                run.id = run["id"]
                 run.timestamp = datetime.fromisoformat(row["timestamp"]) if isinstance(row["timestamp"], str) else row["timestamp"]
         return run
 
@@ -101,3 +98,4 @@ class SimulationRepository(BaseRepository):
                     run_details=row["run_details"]
                 ))
         return runs
+#A

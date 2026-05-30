@@ -4,23 +4,15 @@ import pandas as pd
 from typing import List, Dict, Any
 
 class ChartVisualizer:
-    """
-    Constructs high-performance interactive Plotly charts.
-    Matches the theme of an enterprise mobility logistics SaaS dashboard.
-    """
     
-    # Custom dashboard colors (Black, White, Gray, and Blue)
     COLOR_MAP = {
-        "Carro": "#2563eb",         # Premium Blue
-        "Motocicleta": "#a3a3a3",  # Light Gray
-        "Bicicleta": "#ffffff"      # Pure White
+        "Carro": "#2563eb",
+        "Motocicleta": "#a3a3a3",
+        "Bicicleta": "#ffffff"
     }
     
     @classmethod
     def plot_time_comparison(cls, metrics: List[Dict[str, Any]]) -> go.Figure:
-        """
-        Creates a bar chart comparing travel times in minutes for selected vehicles.
-        """
         data = []
         for m in metrics:
             data.append({
@@ -52,9 +44,6 @@ class ChartVisualizer:
 
     @classmethod
     def plot_cost_comparison(cls, metrics: List[Dict[str, Any]]) -> go.Figure:
-        """
-        Creates a bar chart comparing operational fuel costs in USD.
-        """
         data = []
         for m in metrics:
             data.append({
@@ -86,12 +75,8 @@ class ChartVisualizer:
 
     @classmethod
     def plot_emissions_comparison(cls, metrics: List[Dict[str, Any]]) -> go.Figure:
-        """
-        Creates a bar chart comparing CO2 carbon footprint emissions.
-        """
         data = []
         for m in metrics:
-            # Only plot motorized vehicles or display zero
             data.append({
                 "Modo de Veículo": m["vehicle"],
                 "Pegada de CO2 (g)": m["co2_emissions_g"]
@@ -120,28 +105,17 @@ class ChartVisualizer:
 
     @classmethod
     def plot_radar_rankings(cls, metrics: List[Dict[str, Any]]) -> go.Figure:
-        """
-        Renders a radar (spider) chart evaluating relative vehicle scores across multiple dimensions:
-        Time Efficiency, Cost Saving, Eco-friendliness, Traffic Resiliency.
-        """
         fig = go.Figure()
         
         for m in metrics:
-            # Compute dimension rankings (100 = best, 0 = worst)
             vehicle = m["vehicle"]
-            
-            # Eco-friendliness matches sustainability score
             eco = m["sustainability_score"]
-            
-            # Cost efficiency (lower cost is better)
             cost_val = m["fuel_cost_usd"]
             cost_score = 100 if cost_val == 0.0 else max(10, min(95, 100 - (cost_val * 8)))
             
-            # Time efficiency (lower time is better)
             time_val = m["time_hours"] * 60.0
             time_score = max(15, min(95, 100 - (time_val * 0.8)))
             
-            # Traffic resilience
             if vehicle == "Bicicleta":
                 resilience = 95
             elif vehicle == "Motocicleta":
@@ -171,3 +145,4 @@ class ChartVisualizer:
             title="Atributos Operacionais Multidimensionais"
         )
         return fig
+#A

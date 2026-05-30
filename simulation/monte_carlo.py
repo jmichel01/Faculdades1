@@ -4,10 +4,7 @@ from config.settings import Settings
 from traffic.simulator import TrafficSimulator
 
 class MonteCarloSimulator:
-    """
-    Core Monte Carlo simulation engine.
-    Calculates stochastic distributions for supply chain networks under stress conditions.
-    """
+    
     @staticmethod
     def run_simulation(
         scenario_type: str, 
@@ -18,13 +15,12 @@ class MonteCarloSimulator:
         base_demands: np.ndarray,
         hubs_fixed_costs: List[float]
     ) -> Dict[str, Any]:
-        # Scenario configuration mapping
         if scenario_type == "Optimistic":
             demand_mult, demand_std = 0.85, 0.04
             cost_mult, cost_std = 0.90, 0.03
             cap_mult = 1.0
-            weather_probs = [0.85, 0.12, 0.02, 0.01]  # Sunny, Rainy, Snowy, Stormy
-            traffic_probs = [0.50, 0.40, 0.08, 0.02]  # Low, Medium, High, Peak Hour
+            weather_probs = [0.85, 0.12, 0.02, 0.01]
+            traffic_probs = [0.50, 0.40, 0.08, 0.02]
         elif scenario_type == "Pessimistic":
             demand_mult, demand_std = 1.25, 0.18
             cost_mult, cost_std = 1.35, 0.10
@@ -37,7 +33,7 @@ class MonteCarloSimulator:
             cap_mult = 0.60
             weather_probs = [0.20, 0.40, 0.30, 0.10]
             traffic_probs = [0.02, 0.13, 0.45, 0.40]
-        else: # "Realistic"
+        else:
             demand_mult, demand_std = 1.00, 0.08
             cost_mult, cost_std = 1.00, 0.05
             cap_mult = 1.00
@@ -63,9 +59,7 @@ class MonteCarloSimulator:
         weathers = ["Sunny", "Rainy", "Snowy", "Stormy"]
         traffics = ["Low", "Medium", "High", "Peak Hour"]
 
-        # Run stochastic iterations
         for _ in range(trials):
-            # Apply normal noise and scenario multiplier for supply chain costs
             stochastic_demands = base_demands * rng.normal(demand_mult, demand_std, size=len(base_demands))
             stochastic_demands = np.clip(stochastic_demands, 1.0, None)
             
@@ -85,7 +79,6 @@ class MonteCarloSimulator:
                 service_level = float(np.clip(capacity_ratio * rng.uniform(0.85, 0.95), 0.4, 0.95))
                 stockout_rate = float(np.clip((1.0 - capacity_ratio) * rng.uniform(1.0, 1.25), 0.05, 0.6))
 
-            # Operational cost estimation
             raw_transport_expense = np.sum(stochastic_demands) * np.mean(stochastic_costs) * 0.4
             raw_holding_expense = np.sum(active_capacities) * np.mean(base_holding_costs) * 0.15
             raw_fixed_expense = np.sum(hubs_fixed_costs) * (1.1 if scenario_type == "Crisis" else 1.0)
@@ -98,7 +91,6 @@ class MonteCarloSimulator:
             stockouts_out.append(stockout_rate)
             utilizations_out.append(utilization)
 
-            # Weather & Traffic sampling
             w_state = rng.choice(weathers, p=weather_probs)
             t_intensity = rng.choice(traffics, p=traffic_probs)
             f_price = max(0.50, rng.normal(Settings.DEFAULT_FUEL_PRICE_GASOLINE * cost_mult, 0.15 * cost_mult))
@@ -165,3 +157,4 @@ class MonteCarloSimulator:
             "demand_multiplier": demand_mult,
             "cost_multiplier": cost_mult
         }
+#A

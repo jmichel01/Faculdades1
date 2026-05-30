@@ -17,9 +17,7 @@ from reportlab.pdfgen import canvas
 logger = logging.getLogger("smart_routing.reports.generator")
 
 class NumberedCanvas(canvas.Canvas):
-    """
-    Custom canvas to implement 'Page X of Y' dynamic footers in ReportLab PDFs.
-    """
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._saved_page_states = []
@@ -41,14 +39,12 @@ class NumberedCanvas(canvas.Canvas):
         self.setFont("Helvetica", 9)
         self.setFillColor(colors.HexColor("#4b5563"))
         
-        # Draw header rule and title (except on cover page)
         if self._pageNumber > 1:
             self.setStrokeColor(colors.HexColor("#e5e7eb"))
             self.setLineWidth(0.5)
             self.line(54, 738, 558, 738)
             self.drawString(54, 744, "MOBILIDADE INTELIGENTE - RELATÓRIO EXECUTIVO DE OTIMIZAÇÃO DE ROTAS")
             
-        # Draw footer rule and page number
         self.setStrokeColor(colors.HexColor("#e5e7eb"))
         self.setLineWidth(0.5)
         self.line(54, 50, 558, 50)
@@ -60,10 +56,6 @@ class NumberedCanvas(canvas.Canvas):
 
 
 class ReportGenerator:
-    """
-    Orchestrates professional multi-format export files for the Smart Route Optimization System.
-    Generates styled corporate reports using standard spreadsheet and PDF libraries.
-    """
     
     @staticmethod
     def generate_excel_report(
@@ -73,21 +65,17 @@ class ReportGenerator:
         metrics: List[Dict[str, Any]],
         legs_data: Dict[str, List[Dict[str, Any]]]
     ) -> BytesIO:
-        """
-        Constructs a beautifully formatted, multi-tab Excel report of route metrics and comparisons.
-        """
         logger.info("Constructing styled Excel route report...")
         wb = Workbook()
         
-        # Styles
         font_family = "Segoe UI"
         title_font = Font(name=font_family, size=16, bold=True, color="FFFFFF")
         header_font = Font(name=font_family, size=11, bold=True, color="FFFFFF")
         data_font = Font(name=font_family, size=10)
         bold_font = Font(name=font_family, size=10, bold=True)
         
-        dark_fill = PatternFill(start_color="111827", end_color="111827", fill_type="solid") # Deep Slate
-        light_fill = PatternFill(start_color="F9FAFB", end_color="F9FAFB", fill_type="solid") # Light grey row
+        dark_fill = PatternFill(start_color="111827", end_color="111827", fill_type="solid")
+        light_fill = PatternFill(start_color="F9FAFB", end_color="F9FAFB", fill_type="solid")
         
         thin_border = Border(
             left=Side(style='thin', color='E5E7EB'),
@@ -96,7 +84,6 @@ class ReportGenerator:
             bottom=Side(style='thin', color='E5E7EB')
         )
         
-        # Sheet 1: General Summary
         ws1 = wb.active
         ws1.title = "Resumo do Trajeto"
         ws1.views.sheetView[0].showGridLines = True
@@ -121,7 +108,7 @@ class ReportGenerator:
         weather_pt_map = {"Sunny": "Ensolarado", "Rainy": "Chuvoso", "Snowy": "Nevando", "Stormy": "Tempestuoso"}
         traffic_pt = traffic_pt_map.get(traffic, traffic)
         weather_pt = weather_pt_map.get(weather, weather)
-
+ 
         ws1.append(["Latitude de Partida", locations[0]["lat"], "Coordenada de origem"])
         ws1.append(["Longitude de Partida", locations[0]["lng"], "Coordenada de origem"])
         ws1.append(["Quantidade de Entregas", len(locations) - 1, "Número de residências visitadas"])
@@ -135,7 +122,6 @@ class ReportGenerator:
             for c_idx in range(1, 4):
                 ws1.cell(row=r_idx, column=c_idx).border = thin_border
                 
-        # Sheet 2: Vehicle Comparison
         ws2 = wb.create_sheet(title="Desempenho dos Veículos")
         ws2.views.sheetView[0].showGridLines = True
         
@@ -153,7 +139,6 @@ class ReportGenerator:
                 m["fuel_liters"], m["fuel_cost_usd"], m["co2_emissions_g"],
                 m["calories_burned"], m["sustainability_score"]
             ])
-            # Align and formats
             ws2.cell(row=idx, column=2).number_format = "0.00"
             ws2.cell(row=idx, column=3).number_format = "0.00"
             ws2.cell(row=idx, column=4).number_format = "0.00"
@@ -168,7 +153,6 @@ class ReportGenerator:
                 if idx % 2 == 0:
                     cell.fill = light_fill
 
-        # Sheet 3: Route Legs Details
         ws3 = wb.create_sheet(title="Trechos da Rota")
         ws3.views.sheetView[0].showGridLines = True
         
@@ -193,7 +177,6 @@ class ReportGenerator:
                     cell.border = thin_border
                 r_counter += 1
                 
-        # Column auto-adjustments
         for ws in [ws1, ws2, ws3]:
             for col in ws.columns:
                 max_len = 0
@@ -217,9 +200,6 @@ class ReportGenerator:
         optimal_order: List[int],
         recommendation: Dict[str, Any]
     ) -> BytesIO:
-        """
-        Generates a highly rigorous executive PDF report including route breakdowns.
-        """
         logger.info("Generating styled PDF routing report with ReportLab...")
         buf = BytesIO()
         doc = SimpleDocTemplate(
@@ -228,7 +208,6 @@ class ReportGenerator:
             rightMargin=54, leftMargin=54, topMargin=54, bottomMargin=54
         )
         
-        # Theme colors
         slate_dark = colors.HexColor("#111827")
         emerald_main = colors.HexColor("#10B981")
         grey_light = colors.HexColor("#f3f4f6")
@@ -292,7 +271,6 @@ class ReportGenerator:
 
         story = []
         
-        # --- TITLE PAGE (COVER) ---
         traffic_pt_map = {"Low": "Baixo", "Medium": "Médio", "High": "Alto", "Peak Hour": "Horário de Pico"}
         weather_pt_map = {"Sunny": "Ensolarado", "Rainy": "Chuvoso", "Snowy": "Nevando", "Stormy": "Tempestuoso"}
         traffic_pt = traffic_pt_map.get(traffic, traffic)
@@ -303,7 +281,6 @@ class ReportGenerator:
         story.append(Paragraph("Relatório de Mobilidade Tática e Eficiência Logística", subtitle_style))
         story.append(Spacer(1, 20))
         
-        # Green decoration rule
         story.append(Table(
             [[""]],
             colWidths=[504],
@@ -321,7 +298,6 @@ class ReportGenerator:
         story.append(Paragraph("<b>Escopo:</b> 1 Origem + 3 Residências de Entrega", body_style))
         story.append(PageBreak())
         
-        # --- SECTION 1: EXEC SUMMARY ---
         story.append(Paragraph("1. Resumo Executivo e Configuração", heading1_style))
         story.append(Paragraph(
             "Este relatório documenta a avaliação logística de múltiplos destinos. "
@@ -331,7 +307,6 @@ class ReportGenerator:
             body_style
         ))
         
-        # Settings metadata table
         meta_data = [
             ["Configurações de Roteamento", "Valor", "Notas"],
             ["Coordenadas de Origem", f"{locations[0]['lat']:.5f}, {locations[0]['lng']:.5f}", "Ponto base inicial"],
@@ -354,7 +329,6 @@ class ReportGenerator:
         story.append(t_meta)
         story.append(Spacer(1, 20))
         
-        # --- SECTION 2: COMPARISON TABLE ---
         story.append(Paragraph("2. Comparativo de Métricas por Veículo", heading1_style))
         story.append(Paragraph(
             "A tabela abaixo detalha valores de distância, duração, consumo de combustível, custo, pegada de carbono e calorias. "
@@ -389,7 +363,6 @@ class ReportGenerator:
         story.append(t_metrics)
         story.append(Spacer(1, 25))
         
-        # --- SECTION 3: RECOMMENDATION ---
         story.append(Paragraph("3. Recomendação do Sistema IA", heading1_style))
         
         traffic_pt_map = {"Low": "Baixo", "Medium": "Médio", "High": "Alto", "Peak Hour": "Horário de Pico"}
@@ -406,7 +379,7 @@ class ReportGenerator:
         )
         story.append(Paragraph(rec_txt, recommendation_style))
         
-        # Build Document
         doc.build(story, canvasmaker=NumberedCanvas)
         buf.seek(0)
         return buf
+#A

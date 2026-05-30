@@ -1,18 +1,14 @@
 import sqlite3
-from typing import List, Optional, Tuple, Dict, Any
+from typing import List, Optional
 from datetime import date
 from database.connection import DatabaseConnectionManager
 from models.domain import Hub, Retailer, DemandHistory
 from repositories.base_repository import BaseRepository
 
 class InventoryRepository(BaseRepository):
-    """
-    Handles persistence and queries for Warehouses/Hubs, Retailers, and Demand transactions.
-    """
     def __init__(self) -> None:
         super().__init__("optilogix.repository.inventory")
 
-    # --- Hubs (Distribution Centers) CRUD ---
     def save_hub(self, hub: Hub) -> Hub:
         query = """
             INSERT INTO hubs (id, name, latitude, longitude, capacity, fixed_cost, holding_cost)
@@ -62,7 +58,6 @@ class InventoryRepository(BaseRepository):
                 ))
         return hubs
 
-    # --- Retailers (Customers) CRUD ---
     def save_retailer(self, retailer: Retailer) -> Retailer:
         query = """
             INSERT INTO retailers (id, name, latitude, longitude)
@@ -104,11 +99,7 @@ class InventoryRepository(BaseRepository):
                 ))
         return retailers
 
-    # --- Demand History CRUD & Analytics ---
     def save_demand_history_batch(self, demand_list: List[DemandHistory]) -> None:
-        """
-        Inserts a batch of demand records in a single optimized transaction.
-        """
         query = """
             INSERT INTO demand_history (retailer_id, product_id, date, quantity, price, weather, is_holiday)
             VALUES (?, ?, ?, ?, ?, ?, ?);
@@ -126,9 +117,6 @@ class InventoryRepository(BaseRepository):
         self.logger.info(f"Batched insertion of {len(demand_list)} demand records succeeded.")
 
     def get_historical_demand(self, retailer_id: Optional[str] = None, product_id: Optional[str] = None) -> List[DemandHistory]:
-        """
-        Retrieves historical demand with dynamic query filtering.
-        """
         query = "SELECT id, retailer_id, product_id, date, quantity, price, weather, is_holiday FROM demand_history WHERE 1=1"
         params = []
         if retailer_id:
@@ -153,3 +141,4 @@ class InventoryRepository(BaseRepository):
                     weather=row["weather"], is_holiday=row["is_holiday"]
                 ))
         return history
+#A

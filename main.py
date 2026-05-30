@@ -1,5 +1,4 @@
 import argparse
-import sys
 import logging
 from config.settings import Settings
 from database.manager import DatabaseManager
@@ -8,9 +7,6 @@ logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(levelname)s] [%
 logger = logging.getLogger("smart_routing.main")
 
 def print_math_explanations() -> None:
-    """
-    Outputs academic and mathematical definitions of optimization systems.
-    """
     manifesto = """
 ================================================================================
           SMART MOBILITY OPTIMIZER - MATHEMATICAL MANIFESTO
@@ -115,6 +111,6 @@ def main() -> None:
     elif args.action == "run-tests":
         print("\n[TIP] Please execute the test suite using standard pytest runner:\n  pytest tests/\n")
 
-
 if __name__ == "__main__":
     main()
+#A
